@@ -57,12 +57,12 @@ Genome.prototype = {
         /** Navigation Bar **/
         this.karyotype = this._createKaryotype(args);
 
-//        for (var i = 0; i < this.chromosomes.length; i++) {
-//            var chr = this.chromosomes[i];
-//            if (chr.visible != false) {
-//                this._getChromosomeGenes(chr);
-//            }
-//        }
+        for (var i = 0; i < this.chromosomes.length; i++) {
+            var chr = this.chromosomes[i];
+            if (chr.visible != false) {
+                this._getChromosomeGenes(chr);
+            }
+        }
     },
     _createKaryotype: function (args) {
         var _this = this;
@@ -135,8 +135,9 @@ Genome.prototype = {
 
     },
     drawHistogramTrack: function (features, offset, region, color) {
+
         var chromosome = this._getChromosome(region.chromosome);
-//        var d = SVG.describeArc(this.x, this.y, this.radius+offset, chromosome.angleStart, chromosome.angleEnd)+' ';
+        var d = SVG.describeArc(this.x, this.y, this.radius+offset, chromosome.angleStart, chromosome.angleEnd)+' ';
         var d = '';
         var lastRadius = this.radius + offset;
 
@@ -171,7 +172,7 @@ Genome.prototype = {
     },
     drawSampleTrack: function (features, offset, region, color) {
         var chromosome = this._getChromosome(region.chromosome);
-//        var d = SVG.describeArc(this.x, this.y, this.radius+offset, chromosome.angleStart, chromosome.angleEnd)+' ';
+        var d = SVG.describeArc(this.x, this.y, this.radius+offset, chromosome.angleStart, chromosome.angleEnd)+' ';
         var d = '';
         var lastRadius = this.radius + offset;
 
@@ -243,13 +244,13 @@ Genome.prototype = {
                 success: function (data) {
                     var features = data.response[0].result;
                     _this.chromosomeGenes[chromosome.name] = features;
-                   // _this.drawHistogramTrack(features, 30, region, '#9493b1');
+                    _this.drawHistogramTrack(features, 30, region, '#9493b1');
                     _this.drawSampleTrack(features, -60, region, '#9493b1');
 
                 }
             });
         } else {
-            _this.drawSampleTrack(this.chromosomeGenes[chromosome.name], 30, region, '#9493b1');
+            _this.drawHistogramTrack(this.chromosomeGenes[chromosome.name], 30, region, '#9493b1');
         }
 
 //        var features = [];
