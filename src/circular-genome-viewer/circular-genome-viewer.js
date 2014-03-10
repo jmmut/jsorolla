@@ -20,6 +20,8 @@
  */
 
 function CircularGenomeViewer(args) {
+
+
     // Using Underscore 'extend' function to extend and add Backbone Events
     _.extend(this, Backbone.Events);
 
@@ -55,6 +57,7 @@ function CircularGenomeViewer(args) {
 };
 
 CircularGenomeViewer.prototype = {
+
     render: function () {
         var _this = this;
 
