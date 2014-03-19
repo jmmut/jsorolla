@@ -351,7 +351,7 @@ module.exports = function (grunt) {
                 }
             },
             cgv: {
-                src: 'src/circular-genome-viewer/circular-genome-viewer.html',
+                src: 'src/circular-genome-viewer/circosjs-viewer.html',
                 dest: 'build/circular-genome-viewer/<%= meta.version.cgv %>/',
                 options: {
                     beautify: true,
@@ -448,7 +448,7 @@ module.exports = function (grunt) {
         rename: {
             cgv: {
                 files: [
-                    {src: ['build/circular-genome-viewer/<%= meta.version.cgv %>/circular-genome-viewer.html'], dest: 'build/circular-genome-viewer/<%= meta.version.cgv %>/index.html'}
+                    {src: ['build/circular-genome-viewer/<%= meta.version.cgv %>/circosjs-viewer.html'], dest: 'build/circular-genome-viewer/<%= meta.version.cgv %>/index.html'}
                 ]
             }
         }
