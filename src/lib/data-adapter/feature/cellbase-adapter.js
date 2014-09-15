@@ -102,7 +102,8 @@ CellBaseAdapter.prototype = {
 
                 // Get chunks from cache
                 _this.cache[combinedCacheId].getByRegion(region, function (cachedChunks) {
-                    _this.trigger('data:ready', {items: cachedChunks, dataType: dataType, chunkSize: chunkSize, sender: _this});
+                    var decryptedChunks = _this._decryptChunks(cachedChunks, "mypassword");
+                    _this.trigger('data:ready', {items: decryptedChunks, dataType: dataType, chunkSize: chunkSize, sender: _this});
                     if (args.webServiceCallCount === 0) {
                         args.done();
                     }
@@ -158,7 +159,8 @@ CellBaseAdapter.prototype = {
                 // Get chunks from cache
                 if (chunksByRegion.cached.length > 0) {
                     _this.cache[combinedCacheId].getByRegions(chunksByRegion.cached, function (cachedChunks) {
-                        _this.trigger('data:ready', {items: cachedChunks, dataType: dataType, chunkSize: chunkSize, sender: _this});
+                        var decryptedChunks = _this._decryptChunks(cachedChunks, "mypassword");
+                        _this.trigger('data:ready', {items: decryptedChunks, dataType: dataType, chunkSize: chunkSize, sender: _this});
                         if (args.webServiceCallCount === 0) {
                             args.done();
                         }
@@ -184,7 +186,7 @@ CellBaseAdapter.prototype = {
             regions.push(new Region(queryResult.id));
             chunks.push(queryResult.result);
         }
-        chunks = this.cache[combinedCacheId].putByRegions(regions, chunks);
+        chunks = this.cache[combinedCacheId].putByRegions(regions, this._encryptChunks(chunks, "mypassword"), true);
 
         /** time log **/
         console.timeEnd(timeId);
@@ -218,15 +220,32 @@ CellBaseAdapter.prototype = {
                 chunks.push(interval);
             }
         }
-        var items = this.cache[combinedCacheId].putByRegions(regions, chunks, false, histogramId); // TODO remove "histogram" from "_histogram_<interval>"
+        var items = this.cache[combinedCacheId].putByRegions(regions, this._encryptChunks(chunks, "mypassword"), true, histogramId); // TODO remove "histogram" from "_histogram_<interval>"
 
         this.trigger('data:ready', {items: items, dataType: dataType, chunkSize: chunkSize, sender: this});
         if (args.webServiceCallCount === 0) {
             args.done();
         }
+    },
 
-        /** time log **/
-        console.timeEnd(this.resource + " get and save " + timeId);
+    _decryptChunks: function (chunks, password) {
+        var decryptedChunks = [];
+        for (var i = 0; i < chunks.length; i++) {
+            if (chunks[i].enc == true) {
+                decryptedChunks.push(CryptoJS.AES.decrypt(chunks[i], password));
+            } else {
+                decryptedChunks.push(chunks);
+            }
+        }
+        return decryptedChunks;
+    },
+
+    _encryptChunks: function (chunks, password) {
+        var encryptedChunks = [];
+        for (var i = 0; i < chunks.length; i++) {
+            encryptedChunks.push(CryptoJS.AES.encrypt(chunks[i], password));
+        }
+        return encryptedChunks;
     }
 };
 
