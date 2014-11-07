@@ -150,7 +150,7 @@ FeatureChunkCache.prototype = {
     /**
      * TODO: the regions must be equally long to the chunksize
      */
-    putByRegions: function (regionArray, valueArray, category, dataType, chunkSize) { // encoded
+    putByRegions: function (regionArray, valueArray, category, dataType, chunkSize, args) {
         var temporalChunkSize = chunkSize? chunkSize : this.defaultChunkSize;
         var chunkKeyArray = [];
         for (var i = 0; i < regionArray.length; i++) {
@@ -158,14 +158,14 @@ FeatureChunkCache.prototype = {
             var chunkKey = this.getChunkKey(regionArray[i].chromosome, chunkId,  dataType, chunkSize);
             chunkKeyArray.push(chunkKey);
         }
-        return this.putChunks(chunkKeyArray, valueArray, category, false);
+        return this.putChunks(chunkKeyArray, valueArray, category, args);
     },
 
     /** several chunks in one transaction. this is a fast put */
-    putChunks: function (chunkKeyArray, valueArray, category, encoded) {
+    putChunks: function (chunkKeyArray, valueArray, category, args) {
         var valueStoredArray = [];
         for (var i = 0; i < valueArray.length; i++) {
-            valueStoredArray.push(this.createEntryValue(chunkKeyArray[i], valueArray[i], encoded));   // TODO add timestamp, last usage time, size, etc.
+            valueStoredArray.push(this.createEntryValue(chunkKeyArray[i], valueArray[i], args));   // TODO add timestamp, last usage time, size, etc.
         }
         if (!category) {
             category = this.defaultCategory;
@@ -174,13 +174,10 @@ FeatureChunkCache.prototype = {
         return valueStoredArray;
     },
 
-    createEntryValue: function (chunkKey, value, encoded) {
-        var valueStored;
-        if (encoded) {
-            valueStored = {value: value, chunkKey: chunkKey, enc: encoded}; // TODO add timestamp, last usage time, size, etc.
-        } else {
-            valueStored = {value: value, chunkKey: chunkKey}; // TODO add timestamp, last usage time, size, etc.
-        }
+    createEntryValue: function (chunkKey, value, args) {
+        var valueStored = {};
+        _.extend(valueStored, args);
+        _.extend(valueStored, {value: value, chunkKey: chunkKey});
         return valueStored;
     },
 
@@ -207,6 +204,46 @@ FeatureChunkCache.prototype = {
      _this.putChunk(chunkKey, value);
      });
      },*/
+};
+
+var JsonFormatter = {
+    stringify: function (cipherParams) {
+        // create json object with ciphertext
+        var jsonObj = {
+            ct: cipherParams.ciphertext.toString(CryptoJS.enc.Base64)
+        };
+
+        // optionally add iv and salt
+        if (cipherParams.iv) {
+            jsonObj.iv = cipherParams.iv.toString();
+        }
+        if (cipherParams.salt) {
+            jsonObj.s = cipherParams.salt.toString();
+        }
+
+        // stringify json object
+        return JSON.stringify(jsonObj);
+    },
+
+    parse: function (jsonStr) {
+        // parse json string
+        var jsonObj = JSON.parse(jsonStr);
+
+        // extract ciphertext from json object, and create cipher params object
+        var cipherParams = CryptoJS.lib.CipherParams.create({
+            ciphertext: CryptoJS.enc.Base64.parse(jsonObj.ct)
+        });
+
+        // optionally extract iv and salt
+        if (jsonObj.iv) {
+            cipherParams.iv = CryptoJS.enc.Hex.parse(jsonObj.iv)
+        }
+        if (jsonObj.s) {
+            cipherParams.salt = CryptoJS.enc.Hex.parse(jsonObj.s)
+        }
+
+        return cipherParams;
+    }
 };
 
 

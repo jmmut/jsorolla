@@ -23,7 +23,7 @@ function OpencgaAdapter(args) {
 
     _.extend(this, Backbone.Events);
 
-//    this.sid = "RNk4P0ttFGHyqLA3YGS8";
+    this.encrypt = false;
 
     _.extend(this, args);
 
@@ -167,10 +167,11 @@ OpencgaAdapter.prototype = {
 
         for (var i = 0; i < data.response.length; i++) {    // FIXME each response is a sample? in variant too?
             var queryResult = data.response[i];
-            var items = this._adaptChunks(queryResult, categories[i], dataType, chunkSize);
+            var items = this._saveChunks(queryResult, categories[i], dataType, chunkSize);
+            var decryptedItems = this._decryptChunks(items, "mypassword");
             if (items.length > 0) {
                 // if (data.encoded) {decrypt }
-                args.dataReady({items: items, dataType: dataType, chunkSize: chunkSize, sender: this, category: categories[i]});
+                args.dataReady({items: decryptedItems, dataType: dataType, chunkSize: chunkSize, sender: this, category: categories[i]});
             }
         }
 
@@ -198,28 +199,40 @@ OpencgaAdapter.prototype = {
         return queriesLists;
     },
 
+    _encryptChunks: function (chunks, password) {
+        var encryptedChunks = [];
+
+        for (var i = 0; i < chunks.length; i++) {
+            var message = JSON.stringify(chunks[i]);
+            var encr = CryptoJS.AES.encrypt(message, password, {format: JsonFormatter});
+            encryptedChunks.push(encr.toString());
+//            encryptedChunks.push(encr);
+//            encryptedChunks.push(chunks[i]);
+        }
+        return encryptedChunks;
+    },
+
     _decryptChunks: function (chunks, password) {
         var decryptedChunks = [];
         for (var i = 0; i < chunks.length; i++) {
             if (chunks[i].enc == true) {
-                decryptedChunks.push(CryptoJS.AES.decrypt(chunks[i], password));
+                var decrypt = CryptoJS.AES.decrypt(chunks[i].value, password, {format: JsonFormatter});
+                decryptedChunks.push({chunkKey: chunks[i].chunkKey, value: JSON.parse(decrypt.toString(CryptoJS.enc.Utf8))});
             } else {
-                decryptedChunks.push(chunks[i]);
+                decryptedChunks.push({chunkKey: chunks[i].chunkKey, value: chunks[i].value});
             }
         }
         return decryptedChunks;
     },
 
-    _adaptChunks: function (queryResult, category, dataType, chunkSize) {
-        var chunks;
-        var regions;
+    _saveChunks: function (queryResult, category, dataType, chunkSize) {
+        var chunks = [];
+        var regions = [];
         var items = [];
-//        debugger
+
         if (queryResult.resultType == "org.opencb.biodata.models.variant.Variant") {
-            chunks = [];
-            regions = [];
             var keyToPair = {};
-            for (var i = 0; i < queryResult.result.length; i++) {
+            for (var i = 0; i < queryResult.result.length; i++) {   // the variations don't come separated in chunks
                 var variation = queryResult.result[i];
                 var chunkId = this.cache.getChunkId(variation.start, chunkSize);
                 var key = this.cache.getChunkKey(variation.chromosome,
@@ -234,22 +247,17 @@ OpencgaAdapter.prototype = {
                 }
                 chunks[keyToPair[key]].push(variation);
             }
-
-//            debugger
-            items = this.cache.putByRegions(regions, chunks, category, dataType, chunkSize);
         } else { //if(queryResult.resultType == "org.opencb.biodata.models.alignment.AlignmentRegion") {
-            regions = [];
             for (var j = 0; j < queryResult.result.length; j++) {
                 regions.push(new Region(queryResult.result[j]));
             }
             chunks = queryResult.result;
-
-//            if (data.response[i].result.length == 1) {
-//            } else {
-//                console.log("unexpected data structure");
-//            }
-            items = this.cache.putByRegions(regions, chunks, category, dataType, chunkSize);
         }
+
+        if (this.encrypt) {
+            chunks = this._encryptChunks(chunks, "mypassword");
+        }
+        items = this.cache.putByRegions(regions, chunks, category, dataType, chunkSize, {enc: this.encrypt});
         return items;
     }
 };

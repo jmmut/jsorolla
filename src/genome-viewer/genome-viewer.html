@@ -23,6 +23,7 @@
     <script type="text/javascript" src="../../vendor/jquery.min.js"></script>
 
     <script type="text/javascript" src="../../vendor/jquery.qtip.min.js"></script>
+    <script type="text/javascript" src="../../vendor/cryptojs/rollups/aes.js"></script>
     <!-- /build -->
 
 
@@ -389,14 +390,17 @@ var run = function () {
         minHistogramRegionSize: 10000,
         maxLabelRegionSize: 3000,
         height: 200,
-        samples: ['34', '87'],
+        samples: ['34', '87'],  // 32 4
+//        samples: ['34', '87', '354'],  // 32 4
         featureTypes: ['alignments', 'variants'],
+//        featureTypes: ['alignments', 'variants', 'variants'],
 
         variantRenderer: new VariantRenderer(FEATURE_TYPES.opencgaVariant),
         alignmentRenderer: new AlignmentRenderer(FEATURE_TYPES.bam),
 
         dataAdapter: new OpencgaAdapter({
             sid: "RNk4P0ttFGHyqLA3YGS8",
+            encrypt: true,
             cacheConfig: {
                 defaultChunkSize: 1500,
                 cacheId: "opencga:alignment"
