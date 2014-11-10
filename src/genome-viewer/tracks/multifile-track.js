@@ -345,57 +345,6 @@ MultifileTrack.prototype.dataReady = function (response) {
     _this.updateHeight();
 };
 
-/*
-MultifileTrack.prototype.getFeaturesToRenderByChunk = function (response, filters) {
-    //Returns an array avoiding already drawn features in this.chunksDisplayed
-
-    var getChunkId = function (position) {
-        return Math.floor(position / response.chunkSize);
-    };
-    var getChunkKey = function (chromosome, chunkId) {
-        return response.category + "_" + chromosome + ":" + chunkId + "_" + response.dataType + "_" + response.chunkSize;
-    };
-
-    var chunks = response.items;
-    var chunksToRender = [];
-    var features = [];
-
-    var feature, displayed, featureFirstChunk, featureLastChunk;
-    for (var i = 0, leni = chunks.length; i < leni; i++) {
-        if (this.chunksDisplayed[response.category + "_" + chunks[i].chunkKey] != true) {//check if any chunk is already displayed and skip it
-            features = [];
-            var featuresArray = chunks[i].value.alignments? chunks[i].value.alignments : chunks[i].value;
-            for (var j = 0, lenj = featuresArray.length; j < lenj; j++) {
-                feature = featuresArray[j];
-
-                //check if any feature has been already displayed by another chunk
-                displayed = false;
-                featureFirstChunk = getChunkId(feature.start);
-                featureLastChunk = getChunkId(feature.end);
-                for (var chunkId = featureFirstChunk; chunkId <= featureLastChunk; chunkId++) {
-                    var chunkKey = getChunkKey(feature.chromosome, chunkId);
-                    if (this.chunksDisplayed[chunkKey] == true) {
-                        displayed = true;
-                        break;
-                    }
-                }
-                if (!displayed) {
-                    features.push(feature);
-                }
-            }
-            this.chunksDisplayed[response.category + "_" + chunks[i].chunkKey] = true;
-            if (chunks[i].value.alignments) {
-                chunks[i].value.alignments = features;
-            } else {
-                chunks[i].value = features;
-            }
-            chunksToRender.push(chunks[i].value);
-        }
-    }
-    return chunksToRender;
-};
-*/
-    /* when memoryStore is refactored to manage several categories*/
 MultifileTrack.prototype.getFeaturesToRenderByChunk = function(response) {  // TODO test
     var _this = this;
 
@@ -444,25 +393,6 @@ MultifileTrack.prototype.getFeaturesToRenderByChunk = function(response) {  // T
 
     return chunksToRender;
 };
-//    */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
