@@ -87,7 +87,7 @@
     <script type="text/javascript" src="tracks/feature-track.js"></script>
     <script type="text/javascript" src="tracks/sequence-track.js"></script>
     <script type="text/javascript" src="tracks/gene-track.js"></script>
-    <script type="text/javascript" src="tracks/multisample-track.js"></script>
+    <script type="text/javascript" src="tracks/multifile-track.js"></script>
 
     <script type="text/javascript" src="renderers/renderer.js"></script>
     <script type="text/javascript" src="renderers/feature-renderer.js"></script>
@@ -384,13 +384,13 @@ var run = function () {
     tracks.push(this.variant);
 */
 
-    this.variant = new MultisampleTrack({
+    this.variant = new MultifileTrack({
         title: 'Alignment+Variant',
 //        featureType: 'mixed',   // FIXME this can explode
         minHistogramRegionSize: 10000,
         maxLabelRegionSize: 3000,
         height: 200,
-        samples: ['34', '87'],  // 32 4
+        files: ['34', '87'],  // 32 4
 //        samples: ['34', '87', '354'],  // 32 4
         featureTypes: ['alignments', 'variants'],
 //        featureTypes: ['alignments', 'variants', 'variants'],
@@ -400,7 +400,7 @@ var run = function () {
 
         dataAdapter: new OpencgaAdapter({
             sid: "RNk4P0ttFGHyqLA3YGS8",
-            encrypt: true,
+            encrypt: false,
             cacheConfig: {
                 defaultChunkSize: 1500,
                 cacheId: "opencga:alignment"
