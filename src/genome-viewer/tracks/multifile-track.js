@@ -345,7 +345,59 @@ MultifileTrack.prototype.dataReady = function (response) {
     _this.updateHeight();
 };
 
-MultifileTrack.prototype.getFeaturesToRenderByChunk = function(response) {  // TODO test
+
+
+MultifileTrack.prototype.getFeaturesToRenderByChunk = function(response) {
+    var _this = this;
+
+    var chunks = response.items;
+    var chunksToRender = [];//Returns an array avoiding already drawn features in this.chunksDisplayed
+    var features, feature, displayed, keys = [];
+
+    for (var j = 0; j < chunks.length; j++) {
+        keys.push(chunks[j].chunkKey);
+    }
+
+    _this.chunksDisplayed.foreachChunk(response.category, keys, function (value, key, iteration) {
+        if (value == undefined || value.value != true) {//check if the chunk is already displayed and skip it
+            features = [];
+            var featuresArray = chunks[iteration].value.alignments ? chunks[iteration].value.alignments : chunks[iteration].value;
+            for (var j = 0, lenj = featuresArray.length; j < lenj; j++) {
+                feature = featuresArray[j];
+//                    for (var j = 0, lenj = chunks[iteration].value.alignments.length; j < lenj; j++) {
+//                        feature = chunks[iteration].value.alignments[j];
+                var region = new Region(feature);
+                displayed = false;
+
+                _this.chunksDisplayed.get(region, [response.category], response.dataType, response.chunkSize, function (cached, uncached) {
+                    for (var k = 0; k < cached[response.category].length; k++) {   // check if the feature is in any already displayed chunk
+                        if (cached[response.category][k].value == true) {
+                            displayed = true;
+                            break;
+                        }
+                    }
+                    if (!displayed) {
+                        features.push(feature);
+                    }
+                });
+            }
+
+            _this.chunksDisplayed.putChunks([chunks[iteration].chunkKey], [true], response.category);   // mark it as displayed
+//                    chunks[iteration].value.alignments = features;
+            if (chunks[iteration].value.alignments) {
+                chunks[iteration].value.alignments = features;
+            } else {
+                chunks[iteration].value = features;
+            }
+            chunksToRender.push(chunks[iteration].value); // add to chunks to render
+        }
+    });
+
+    return chunksToRender;
+};
+
+/*
+MultifileTrack.prototype.getFeaturesToRenderByChunk = function(response) {
     var _this = this;
 
     var chunks = response.items;
@@ -394,6 +446,6 @@ MultifileTrack.prototype.getFeaturesToRenderByChunk = function(response) {  // T
     return chunksToRender;
 };
 
-
+*/
 
 

@@ -133,10 +133,18 @@ MemoryStore.prototype = {
         }
         callback(valueArray);
     },
-
-    foreach: function (category, keyArray, callback) {
+    /**
+     * @param category
+     * @param keyArray
+     * @param chunkCallback function(value, key, i) called once per chunk retrieved. Receives as parameters the value, its key, and the position of the key in the keyArray.
+     * @param whenCompleteCallback (optional, no parameters) function() called when all chunkCallbacks finished
+     */
+    foreach: function (category, keyArray, callback, whenCompletedCallback) {
         for (var i = 0; i < keyArray.length; i++) {
-            callback(this.get(category, keyArray[i]), keyArray[i]);
+            callback(this.get(category, keyArray[i]), keyArray[i], i);
+        }
+        if (whenCompletedCallback) {
+            whenCompletedCallback();
         }
     },
 

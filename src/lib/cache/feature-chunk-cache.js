@@ -118,6 +118,23 @@ FeatureChunkCache.prototype = {
         this.store.getAll(category, chunkKeysArray, callback);
     },
 
+    /**
+     *
+     * @param category
+     * @param chunkKeysArray
+     * @param chunkCallback function(value, key, i) called once per chunk retrieved. Receives as parameters the value, its key, and the position of the key in the keyArray.
+     * @param whenCompleteCallback (optional, no parameters) function() called when all chunkCallbacks finished
+     */
+    foreachChunk: function (category, chunkKeysArray, chunkCallback, whenCompletedCallback) {
+        if (!chunkCallback) {
+            console.log("bad FeatureChunkCache usage: undefined chunkCallback");
+        }
+        if (!category) {
+            category = this.defaultCategory;
+        }
+        this.store.foreach(category, chunkKeysArray, chunkCallback, whenCompletedCallback);
+    },
+
     joinRegions: function(regions) {
         if (regions.length <= 1) {
             return regions;
