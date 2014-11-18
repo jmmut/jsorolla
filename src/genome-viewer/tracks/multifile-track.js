@@ -176,7 +176,8 @@ MultifileTrack.prototype.render = function (targetId) {
         _this.svgGroups[file] = SVG.addChild(_this.fileMainSvgs[file], 'svg', {
             'class': 'svgGroup',
             'x': -_this.pixelPosition,
-            'width': _this.svgCanvasWidth
+            'width': _this.svgCanvasWidth,
+            'overflow': 'auto'
 //            'height': fileHeight
         });
         _this.renderers[file].init(_this.svgGroups[file], file);
